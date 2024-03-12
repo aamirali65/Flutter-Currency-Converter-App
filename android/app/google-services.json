@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "78111974650",
+    "project_id": "currency-e9f4f",
+    "storage_bucket": "currency-e9f4f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:78111974650:android:19811be3458afd6db05543",
+        "android_client_info": {
+          "package_name": "com.example.currensee"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADDChhf315QvKmUDtlPyS5MVcZHAtfjNI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
