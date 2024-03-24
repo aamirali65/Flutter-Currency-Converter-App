@@ -4,6 +4,8 @@ import 'package:currensee/widgets/customButton.dart';
 import 'package:currensee/widgets/customTextField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,7 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
     emailController.dispose();
     passwordController.dispose();
   }
-
+  Future<void> saveUserEmail(String email) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_email', email);
+  }
   void login() {
     if (formkey.currentState!.validate()) {
       setState(() {
@@ -38,6 +43,10 @@ class _LoginScreenState extends State<LoginScreen> {
               email: emailController.text,
               password: passwordController.text.toString())
           .then((value) {
+        String? userEmail = value.user?.email;
+        if (userEmail != null) {
+          saveUserEmail(userEmail);
+        }
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => const HomeScreen()));
         setState(() {
@@ -49,15 +58,28 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           loading = false;
         });
+        emailController.clear();
+        passwordController.clear();
       });
     }
   }
 
+
+  SignWithGoogle()async{
+    GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken
+    );
+    UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+    print(userCredential.user?.email);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 50),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -71,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontWeight: FontWeight.w600),
             ),
             const SizedBox(
-              height: 50,
+              height: 20,
             ),
             const Align(
               alignment: Alignment.centerLeft,
@@ -81,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(
-              height: 30,
+              height: 10,
             ),
             Form(
               key: formkey,
@@ -124,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(
-                  height: 30,
+                  height: 20,
                 ),
               ],
             )),
@@ -134,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
               login();
                 }),
             const SizedBox(
-              height: 30,
+              height: 10,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -156,12 +178,15 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 20,
             ),
             InkWell(
-              onTap: () {},
+              onTap: () async{
+                await SignWithGoogle();
+              },
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    border: Border.all(color: Colors.grey.shade200)),
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey.shade300)),
                 height: 50,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: const Center(
@@ -173,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(
-              height: 80,
+              height: 20,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

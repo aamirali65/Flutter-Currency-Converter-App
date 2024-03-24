@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:currensee/pages/login.dart';
 import 'package:currensee/widgets/customButton.dart';
 import 'package:currensee/widgets/customTextField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -14,6 +16,7 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final passwordController = TextEditingController();
   final emailController = TextEditingController();
+  final usernameController = TextEditingController();
   bool loading = false;
   final formkey = GlobalKey<FormState>();
   bool _obscureText = true;
@@ -34,28 +37,45 @@ class _RegisterState extends State<Register> {
       });
       _auth
           .createUserWithEmailAndPassword(
-              email: emailController.text.toString(),
-              password: passwordController.text.toString())
+        email: emailController.text.toString(),
+        password: passwordController.text.toString(),
+      )
           .then((value) {
-        setState(() {
-          loading = false;
-        });
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('User Created Successfully!')));
-        Navigator.pushReplacement(
+
+        FirebaseFirestore.instance.collection('users').doc(value.user!.uid).set({
+          'email': emailController.text.toString(),
+          'username': usernameController.text.toString(),
+          // Add other user details if needed
+        }).then((_) {
+          setState(() {
+            loading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User Created Successfully!')));
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => const LoginScreen(),
-            ));
+            ),
+          );
+        }).catchError((error) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+          setState(() {
+            loading = false;
+          });
+          emailController.clear();
+          passwordController.clear();
+        });
       }).onError((error, stackTrace) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
         setState(() {
           loading = false;
         });
+        emailController.clear();
+        passwordController.clear();
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +84,7 @@ class _RegisterState extends State<Register> {
         automaticallyImplyLeading: false,
       ),
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 50),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -78,7 +98,7 @@ class _RegisterState extends State<Register> {
                   fontWeight: FontWeight.w600),
             ),
             const SizedBox(
-              height: 50,
+              height: 30,
             ),
             const Align(
               alignment: Alignment.centerLeft,
@@ -88,12 +108,25 @@ class _RegisterState extends State<Register> {
               ),
             ),
             const SizedBox(
-              height: 30,
+              height: 10,
             ),
             Form(
               key: formkey,
                 child: Column(
               children: [
+                CustomTextField(
+                    labelText: 'Username',
+                    controller: usernameController,
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Enter Your Name';
+                      } else {
+                        return null;
+                      }
+                    }),
+                const SizedBox(
+                  height: 10,
+                ),
                 CustomTextField(
                     labelText: 'Email',
                     controller: emailController,
@@ -141,7 +174,7 @@ class _RegisterState extends State<Register> {
               signup();
             }),
             const SizedBox(
-              height: 80,
+              height: 30,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

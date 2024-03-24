@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:currensee/services/splash_service.dart';
+import 'package:currensee/widgets/customText.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -19,24 +20,16 @@ class _SplashScreenState extends State<SplashScreen> {
     splashScreen.isLogin(context);
   }
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xff182D9E),
+    return Scaffold(
+      backgroundColor: const Color(0xff182D9E),
       body: SizedBox(
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('CurrenSee',style: TextStyle(
-              color: Colors.white,
-              fontSize: 50,
-                fontFamily: 'Lexend'
-            ),),
-            SizedBox(height: 10,),
-            Text('The Currency Conversion App',style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontFamily: 'Lexend'
-            ),),
+           MyText('CurrenSee', Colors.white, 50),
+            const SizedBox(height: 10,),
+            MyText('The Currency Conversion App', Colors.white, 14),
           ],
         ),
       ),
