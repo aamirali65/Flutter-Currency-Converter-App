@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:currensee/pages/faqs.dart';
 import 'package:currensee/pages/feedback.dart';
+import 'package:currensee/services/connection.dart';
+import 'package:currensee/services/notification-helper.dart';
 import 'package:http/http.dart' as http;
 import 'package:currensee/pages/history.dart';
 import 'package:currensee/pages/login.dart';
@@ -416,6 +419,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     getUserEmail();
+
+    Timer.periodic(Duration(minutes: 20), (timer) {
+      NotifictaionHelper.pushNotification(
+        title: 'USD Exchange Rate',
+        body: 'Latest USD Exchange Rate',
+      );
+    });
   }
 
   @override
@@ -485,327 +495,332 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: ListView(
+      body: Stack(
         children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 1,
-            height: MediaQuery.of(context).size.width * 0.50,
-            child: const Image(image: AssetImage('assets/images/bg.jpg')),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              children: [
-                Row(
+          InternetConnection(),
+          ListView(
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 1,
+                height: MediaQuery.of(context).size.width * 0.50,
+                child: const Image(image: AssetImage('assets/images/bg.jpg')),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
                   children: [
-                    MyText('Amount :', const Color(0xff182D9E), 20),
+                    Row(
+                      children: [
+                        MyText('Amount :', const Color(0xff182D9E), 20),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Expanded(
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: AmountEditingController,
+                              decoration: InputDecoration(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                                  border: OutlineInputBorder(
+                                      borderSide: const BorderSide(color: Color(0xff182D9E)),
+                                      borderRadius: BorderRadius.circular(30)),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderSide: const BorderSide(color: Color(0xff182D9E)),
+                                      borderRadius: BorderRadius.circular(30)),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: const BorderSide(color: Color(0xff182D9E)),
+                                      borderRadius: BorderRadius.circular(30))),
+                            ))
+                      ],
+                    ),
                     const SizedBox(
-                      width: 20,
+                      height: 30,
                     ),
-                    Expanded(
-                        child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: AmountEditingController,
-                      decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                          border: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Color(0xff182D9E)),
-                              borderRadius: BorderRadius.circular(30)),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Color(0xff182D9E)),
-                              borderRadius: BorderRadius.circular(30)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(color: Color(0xff182D9E)),
-                              borderRadius: BorderRadius.circular(30))),
-                    ))
-                  ],
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                const Divider(),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const Divider(),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        MyText('From', const Color(0xff182D9E), 19),
-                        DropdownButtonHideUnderline(
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.33,
-                            child: DropdownButton2<String>(
-                              isExpanded: true,
-                              hint: Text(
-                                'Select',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context).hintColor,
-                                ),
-                              ),
-                              items: items
-                                  .map((item) => DropdownMenuItem(
-                                        value: item,
-                                        child: Text(
-                                          item,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ))
-                                  .toList(),
-                              value: selectedValue,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedValue = value;
-                                });
-                              },
-                              buttonStyleData: const ButtonStyleData(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom:
-                                            BorderSide(color: Colors.grey))),
-                                height: 40,
-                                // Remove width here
-                              ),
-                              dropdownStyleData: const DropdownStyleData(
-                                maxHeight: 200,
-                              ),
-                              menuItemStyleData: const MenuItemStyleData(
-                                height: 40,
-                              ),
-                              dropdownSearchData: DropdownSearchData(
-                                searchController: FromtextEditingController,
-                                searchInnerWidgetHeight: 50,
-                                searchInnerWidget: Container(
-                                  height: 50,
-                                  padding: const EdgeInsets.only(
-                                    top: 8,
-                                    bottom: 4,
-                                    right: 8,
-                                    left: 8,
-                                  ),
-                                  child: TextFormField(
-                                    expands: true,
-                                    maxLines: null,
-                                    controller: FromtextEditingController,
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 8,
-                                      ),
-                                      hintText: 'Search for an item...',
-                                      hintStyle: const TextStyle(fontSize: 12),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            MyText('From', const Color(0xff182D9E), 19),
+                            DropdownButtonHideUnderline(
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.33,
+                                child: DropdownButton2<String>(
+                                  isExpanded: true,
+                                  hint: Text(
+                                    'Select',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context).hintColor,
                                     ),
                                   ),
+                                  items: items
+                                      .map((item) => DropdownMenuItem(
+                                    value: item,
+                                    child: Text(
+                                      item,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ))
+                                      .toList(),
+                                  value: selectedValue,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedValue = value;
+                                    });
+                                  },
+                                  buttonStyleData: const ButtonStyleData(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom:
+                                            BorderSide(color: Colors.grey))),
+                                    height: 40,
+                                    // Remove width here
+                                  ),
+                                  dropdownStyleData: const DropdownStyleData(
+                                    maxHeight: 200,
+                                  ),
+                                  menuItemStyleData: const MenuItemStyleData(
+                                    height: 40,
+                                  ),
+                                  dropdownSearchData: DropdownSearchData(
+                                    searchController: FromtextEditingController,
+                                    searchInnerWidgetHeight: 50,
+                                    searchInnerWidget: Container(
+                                      height: 50,
+                                      padding: const EdgeInsets.only(
+                                        top: 8,
+                                        bottom: 4,
+                                        right: 8,
+                                        left: 8,
+                                      ),
+                                      child: TextFormField(
+                                        expands: true,
+                                        maxLines: null,
+                                        controller: FromtextEditingController,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 8,
+                                          ),
+                                          hintText: 'Search for an item...',
+                                          hintStyle: const TextStyle(fontSize: 12),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    searchMatchFn: (item, searchValue) {
+                                      return item.value
+                                          .toString()
+                                          .contains(searchValue);
+                                    },
+                                  ),
+                                  //This to clear the search value when you close the menu
+                                  onMenuStateChange: (isOpen) {
+                                    if (!isOpen) {
+                                      FromtextEditingController.clear();
+                                    }
+                                  },
                                 ),
-                                searchMatchFn: (item, searchValue) {
-                                  return item.value
-                                      .toString()
-                                      .contains(searchValue);
-                                },
                               ),
-                              //This to clear the search value when you close the menu
-                              onMenuStateChange: (isOpen) {
-                                if (!isOpen) {
-                                  FromtextEditingController.clear();
-                                }
-                              },
+                            ),
+                          ],
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              String? temp = selectedValue;
+                              selectedValue = selectedValue2;
+                              selectedValue2 = temp;
+                            });
+                          },
+                          child: Container(
+                            width: 55,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              color: const Color(0xff182D9E),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: const Icon(
+                              Icons.swap_horiz,
+                              color: Colors.white,
+                              size: 40,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          String? temp = selectedValue;
-                          selectedValue = selectedValue2;
-                          selectedValue2 = temp;
-                        });
-                      },
-                      child: Container(
-                        width: 55,
-                        height: 55,
-                        decoration: BoxDecoration(
-                          color: const Color(0xff182D9E),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: const Icon(
-                          Icons.swap_horiz,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      ),
-                    ),
 
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        MyText('To', const Color(0xff182D9E), 19),
-                        DropdownButtonHideUnderline(
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.33,
-                            child: DropdownButton2<String>(
-                              isExpanded: true,
-                              hint: Text(
-                                'Select',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context).hintColor,
-                                ),
-                              ),
-                              items: items2
-                                  .map((item) => DropdownMenuItem(
-                                        value: item,
-                                        child: Text(
-                                          item,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ))
-                                  .toList(),
-                              value: selectedValue2,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedValue2 = value;
-                                });
-                              },
-                              buttonStyleData: const ButtonStyleData(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom:
-                                            BorderSide(color: Colors.grey))),
-                                height: 40,
-                                // Remove width here
-                              ),
-                              dropdownStyleData: const DropdownStyleData(
-                                maxHeight: 200,
-                              ),
-                              menuItemStyleData: const MenuItemStyleData(
-                                height: 40,
-                              ),
-                              dropdownSearchData: DropdownSearchData(
-                                searchController: TotextEditingController,
-                                searchInnerWidgetHeight: 50,
-                                searchInnerWidget: Container(
-                                  height: 50,
-                                  padding: const EdgeInsets.only(
-                                    top: 8,
-                                    bottom: 4,
-                                    right: 8,
-                                    left: 8,
-                                  ),
-                                  child: TextFormField(
-                                    expands: true,
-                                    maxLines: null,
-                                    controller: TotextEditingController,
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 8,
-                                      ),
-                                      hintText: 'Search for an item...',
-                                      hintStyle: const TextStyle(fontSize: 12),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            MyText('To', const Color(0xff182D9E), 19),
+                            DropdownButtonHideUnderline(
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.33,
+                                child: DropdownButton2<String>(
+                                  isExpanded: true,
+                                  hint: Text(
+                                    'Select',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context).hintColor,
                                     ),
                                   ),
+                                  items: items2
+                                      .map((item) => DropdownMenuItem(
+                                    value: item,
+                                    child: Text(
+                                      item,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ))
+                                      .toList(),
+                                  value: selectedValue2,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedValue2 = value;
+                                    });
+                                  },
+                                  buttonStyleData: const ButtonStyleData(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom:
+                                            BorderSide(color: Colors.grey))),
+                                    height: 40,
+                                    // Remove width here
+                                  ),
+                                  dropdownStyleData: const DropdownStyleData(
+                                    maxHeight: 200,
+                                  ),
+                                  menuItemStyleData: const MenuItemStyleData(
+                                    height: 40,
+                                  ),
+                                  dropdownSearchData: DropdownSearchData(
+                                    searchController: TotextEditingController,
+                                    searchInnerWidgetHeight: 50,
+                                    searchInnerWidget: Container(
+                                      height: 50,
+                                      padding: const EdgeInsets.only(
+                                        top: 8,
+                                        bottom: 4,
+                                        right: 8,
+                                        left: 8,
+                                      ),
+                                      child: TextFormField(
+                                        expands: true,
+                                        maxLines: null,
+                                        controller: TotextEditingController,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 8,
+                                          ),
+                                          hintText: 'Search for an item...',
+                                          hintStyle: const TextStyle(fontSize: 12),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    searchMatchFn: (item, searchValue) {
+                                      return item.value
+                                          .toString()
+                                          .contains(searchValue);
+                                    },
+                                  ),
+                                  onMenuStateChange: (isOpen) {
+                                    if (!isOpen) {
+                                      TotextEditingController.clear();
+                                    }
+                                  },
                                 ),
-                                searchMatchFn: (item, searchValue) {
-                                  return item.value
-                                      .toString()
-                                      .contains(searchValue);
-                                },
                               ),
-                              onMenuStateChange: (isOpen) {
-                                if (!isOpen) {
-                                  TotextEditingController.clear();
-                                }
-                              },
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                      color: const Color(0xffD3D9E7),
-                      borderRadius: BorderRadius.circular(30)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Result : ',
-                        style: TextStyle(
-                            color: Color(0xff182D9E),
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Lexend',
-                            fontSize: 20),
-                      ),
-                      Text(
-                        convertedResult ?? '',
-                        style: const TextStyle(
-                            color: Color(0xff182D9E),
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Lexend',
-                            fontSize: 20),
-                      )
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                InkWell(
-                  onTap: () async {
-                    // Call the API to convert currencies
-                    double amount = double.parse(AmountEditingController.text);
-                    await convertCurrency(selectedValue!, selectedValue2!, amount);
-                  },
-                  child: Container(
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
-                          color: const Color(0xff182D9E),
+                          color: const Color(0xffD3D9E7),
                           borderRadius: BorderRadius.circular(30)),
-                      child: const Center(
-                          child: Text(
-                        'CONVERT',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: 'Lexend',
-                            fontSize: 18),
-                      ))),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Result : ',
+                            style: TextStyle(
+                                color: Color(0xff182D9E),
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Lexend',
+                                fontSize: 20),
+                          ),
+                          Text(
+                            convertedResult ?? '',
+                            style: const TextStyle(
+                                color: Color(0xff182D9E),
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Lexend',
+                                fontSize: 20),
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        // Call the API to convert currencies
+                        double amount = double.parse(AmountEditingController.text);
+                        await convertCurrency(selectedValue!, selectedValue2!, amount);
+                      },
+                      child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                              color: const Color(0xff182D9E),
+                              borderRadius: BorderRadius.circular(30)),
+                          child: const Center(
+                              child: Text(
+                                'CONVERT',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: 'Lexend',
+                                    fontSize: 18),
+                              ))),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              )
+            ],
           )
         ],
       ),

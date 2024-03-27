@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:currensee/services/splash_service.dart';
 import 'package:currensee/widgets/customText.dart';
 import 'package:flutter/material.dart';

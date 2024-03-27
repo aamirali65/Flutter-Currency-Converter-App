@@ -12,7 +12,12 @@
           "package_name": "com.example.currensee"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "78111974650-e8et4hkkq94q0vdtsc309t56bl4dpp9i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyADDChhf315QvKmUDtlPyS5MVcZHAtfjNI"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "78111974650-e8et4hkkq94q0vdtsc309t56bl4dpp9i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

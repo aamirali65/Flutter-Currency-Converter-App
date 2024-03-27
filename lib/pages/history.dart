@@ -1,4 +1,5 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:currensee/services/connection.dart';
 import 'package:currensee/widgets/customText.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -85,48 +86,53 @@ class _HistoryState extends State<History> {
           ),
         ],
       ),
-      body: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('conversion_history')
-              .where('user_email', isEqualTo: currentUser?.email)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return const Center(child: Text('Error'));
-            }
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('No history available'));
-            }
-            return ListView.builder(
-              itemCount: snapshot.data!.docs.length,
-              itemBuilder: (context, index) {
-                var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-                return Card(
-                  color: Color(0xff182D9E),
-                  child: ListTile(
-                    title: MyText('${data['amount']}', Colors.white, 18),
-                    subtitle: MyText(
-                      '${data['base_code']} to ${data['target_code']}',
-                      Colors.white,
-                      14,
-                    ),
-                    trailing: MyText(
-                      '${(data['timestamp'] as Timestamp).toDate().toString()}',
-                      Colors.white,
-                      13,
-                    ),
-                  ),
+      body: Stack(
+        children: [
+          InternetConnection(),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('conversion_history')
+                  .where('user_email', isEqualTo: currentUser?.email)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error'));
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No history available'));
+                }
+                return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                    return Card(
+                      color: Color(0xff182D9E),
+                      child: ListTile(
+                        title: MyText('${data['amount']}', Colors.white, 18),
+                        subtitle: MyText(
+                          '${data['base_code']} to ${data['target_code']}',
+                          Colors.white,
+                          14,
+                        ),
+                        trailing: MyText(
+                          '${(data['timestamp'] as Timestamp).toDate().toString()}',
+                          Colors.white,
+                          13,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
+          )
+        ],
       ),
     );
   }

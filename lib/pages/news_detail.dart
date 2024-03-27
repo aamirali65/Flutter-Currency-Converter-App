@@ -1,3 +1,4 @@
+import 'package:currensee/services/connection.dart';
 import 'package:currensee/widgets/customText.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -13,11 +14,16 @@ class NewsDetail extends StatelessWidget {
         backgroundColor: const Color(0xff182D9E),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Container(
-        child: WebView(
-          initialUrl: blogUrl,
-          javascriptMode: JavascriptMode.unrestricted,
-        ),
+      body: Stack(
+        children: [
+          InternetConnection(),
+          Container(
+            child: WebView(
+              initialUrl: blogUrl,
+              javascriptMode: JavascriptMode.unrestricted,
+            ),
+          )
+        ],
       )
     );
   }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:currensee/pages/login.dart';
+import 'package:currensee/services/connection.dart';
 import 'package:currensee/widgets/customButton.dart';
 import 'package:currensee/widgets/customTextField.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -81,118 +82,136 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
       ),
-      body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        width: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'CurrenSee',
-              style: TextStyle(
-                  color: Color(0xff182D9E),
-                  fontSize: 25,
-                  fontFamily: 'Lexend',
-                  fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Register to your Account',
-                style: TextStyle(fontFamily: 'Lexend', fontSize: 18),
+      body: Stack(
+        children: [
+          InternetConnection(),
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'CurrenSee',
+                      style: TextStyle(
+                        color: Color(0xff182D9E),
+                        fontSize: 25,
+                        fontFamily: 'Lexend',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Register to your Account',
+                        style: TextStyle(fontFamily: 'Lexend', fontSize: 18),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Form(
+                      key: formkey,
+                      child: Column(
+                        children: [
+                          CustomTextField(
+                            labelText: 'Username',
+                            controller: usernameController,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Enter Your Name';
+                              } else {
+                                return null;
+                              }
+                            },
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          CustomTextField(
+                            labelText: 'Email',
+                            controller: emailController,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Enter Your Email';
+                              } else {
+                                return null;
+                              }
+                            },
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          CustomTextField(
+                            labelText: 'Password',
+                            suffix: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                              icon: _obscureText
+                                  ? Icon(Icons.visibility_outlined)
+                                  : Icon(Icons.visibility_off_outlined),
+                            ),
+                            controller: passwordController,
+                            obscureText: _obscureText,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Enter Your Password';
+                              } else {
+                                return null;
+                              }
+                            },
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                        ],
+                      ),
+                    ),
+                    CustomButton(
+                      customText: ' Sign up',
+                      loading: loading,
+                      onTap: signup,
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("already have an account ? "),
+                        InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            'Sign in',
+                            style: TextStyle(color: Color(0xff182D9E)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 80,)
+                  ],
+                ),
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            Form(
-              key: formkey,
-                child: Column(
-              children: [
-                CustomTextField(
-                    labelText: 'Username',
-                    controller: usernameController,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Enter Your Name';
-                      } else {
-                        return null;
-                      }
-                    }),
-                const SizedBox(
-                  height: 10,
-                ),
-                CustomTextField(
-                    labelText: 'Email',
-                    controller: emailController,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Enter Your Email';
-                      } else {
-                        return null;
-                      }
-                    }),
-                const SizedBox(
-                  height: 10,
-                ),
-                CustomTextField(
-                  labelText: 'Password',
-                  suffix: IconButton(onPressed: (){
-                    if(_obscureText){
-                      _obscureText = false;
-                    }else{
-                      _obscureText = true;
-                    }
-                    setState(() {
-
-                    });
-                  }, icon: _obscureText ? Icon(Icons.visibility_outlined): Icon(Icons.visibility_off_outlined)),
-                  controller: passwordController,
-                  obscureText: _obscureText,
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Enter Your Password';
-                    } else {
-                      return null;
-                    }
-                  },
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-              ],
-            )),
-            CustomButton(
-                customText: ' Sign up',
-                loading: loading,
-                onTap: () {
-              signup();
-            }),
-            const SizedBox(
-              height: 30,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("already have an account ? "),
-                InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Sign in',
-                      style: TextStyle(color: Color(0xff182D9E)),
-                    ))
-              ],
-            )
-          ],
-        ),
+          )
+        ],
       ),
     );
   }
+
 }

@@ -9,7 +9,8 @@ class SplashService{
     final auth = FirebaseAuth.instance;
     final user = auth.currentUser;
     if(user != null){
-      Timer(const Duration(seconds: 1), () {
+      Timer(const Duration(seconds: 3), () {
+
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
 
       });
