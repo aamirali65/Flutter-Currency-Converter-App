@@ -1,16 +1,37 @@
-# currensee
+# Flutter Currency Converter
 
-A new Flutter project.
+A modern currency converter app built with Flutter. This app allows users to convert currencies, view the latest currency news, check historical exchange rates, and log in securely using authentication.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Currency Conversion**: Convert between multiple currencies with real-time exchange rates.
+- **Currency News**: Stay updated with the latest news about currency markets.
+- **Historical Data**: View past exchange rate trends and history.
+- **Login & Authentication**: Secure user login and registration functionality.
+- **Modern UI**: A clean and user-friendly interface designed for an optimal experience.
 
-A few resources to get you started if this is your first Flutter project:
+## Installation
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Prerequisites
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Flutter SDK installed. You can follow the installation guide [here](https://flutter.dev/docs/get-started/install).
+- Dart SDK (comes with Flutter SDK).
+- An IDE such as VS Code or Android Studio with Flutter plugin installed.
+
+### Steps
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/flutter_currency_converter.git
+
+2. Navigate into the project directory:
+   ```bash
+   cd flutter_currency_converter
+
+3. Install dependencies:
+   ```bash
+   flutter pub get
+
+4. Run the app:
+   ```bash
+   flutter run
